@@ -12,6 +12,7 @@
     <!-- App-local ICU for Chiseled/Distroless (no system libicu). CI passes -p:UseAppLocalIcu=true
          together with the target RID, so only the matching platform package is restored. -->
     <PackageReference Include="Icu4C.Runtime.linux-x64" Version="79.1.1" Condition="'$(UseAppLocalIcu)' == 'true' and '$(RuntimeIdentifier)' == 'linux-x64'" />
+    <PackageReference Include="Icu4C.Runtime.linux-musl-x64" Version="79.1.1" Condition="'$(UseAppLocalIcu)' == 'true' and '$(RuntimeIdentifier)' == 'linux-musl-x64'" />
     <PackageReference Include="Icu4C.Runtime.osx-arm64" Version="79.1.1" Condition="'$(UseAppLocalIcu)' == 'true' and '$(RuntimeIdentifier)' == 'osx-arm64'" />
   </ItemGroup>
 

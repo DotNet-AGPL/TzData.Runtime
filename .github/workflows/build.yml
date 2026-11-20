@@ -56,11 +56,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-bookworm-slim
+          - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-noble
+            rid: linux-x64
             has-shell: true
           - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
+            rid: linux-musl-x64
             has-shell: true
           - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-noble-chiseled
+            rid: linux-x64
             has-shell: false
     steps:
       - uses: actions/checkout@v4
@@ -74,10 +77,10 @@ jobs:
           name: nupkg
           path: nupkg
 
-      - name: Publish test apps (self-contained linux-x64)
+      - name: Publish test apps (self-contained ${{ matrix.rid }})
         run: |
-          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r linux-x64 --self-contained -p:UseAppLocalIcu=true -o out/tzd
-          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r linux-x64 --self-contained -p:UseAppLocalIcu=true -o out/auto
+          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r ${{ matrix.rid }} --self-contained -p:UseAppLocalIcu=true -o out/tzd
+          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r ${{ matrix.rid }} --self-contained -p:UseAppLocalIcu=true -o out/auto
 
       - name: Run in ${{ matrix.image }}
         env:
@@ -136,8 +139,9 @@ jobs:
 
       - name: Publish and run (osx-arm64)
         run: |
-          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r osx-arm64 --self-contained -p:UseAppLocalIcu=true -o out/tzd
-          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r osx-arm64 --self-contained -p:UseAppLocalIcu=true -o out/auto
+          # macOS has a system ICU; this test isolates tzdata from the app-local ICU package.
+          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r osx-arm64 --self-contained -o out/tzd
+          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r osx-arm64 --self-contained -o out/auto
           ./out/tzd/TzData.Tests
           ./out/auto/TzData.AutoInit.Tests
 
