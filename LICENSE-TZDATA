@@ -1,0 +1,12 @@
+TZDATA PUBLIC DOMAIN NOTICE
+
+The IANA Time Zone Database (tzdata) is in the public domain.
+
+The data files bundled in this package are compiled from the IANA tzdata
+release identified in Directory.Build.props (`TzDataVersion`) using `zic`.
+
+Source: https://www.iana.org/time-zones
+License: https://www.iana.org/time-zones (public domain)
+
+The build scripts and the managed wrapper in this repository are licensed
+under the Apache License 2.0 (see LICENSE).

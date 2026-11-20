@@ -1,0 +1,19 @@
+<Project>
+
+  <PropertyGroup>
+    <TzDataRuntimeCopyData Condition="'$(TzDataRuntimeCopyData)' == ''">true</TzDataRuntimeCopyData>
+    <_TzDataRuntimeDataDir>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)..', 'tzdata'))</_TzDataRuntimeDataDir>
+  </PropertyGroup>
+
+  <!-- Copy the packaged tzdata next to the app (and into the publish root). The data is copied on
+       every OS so cross-publishing (for example Windows -> linux-x64) also works; Windows apps
+       simply never use it because TzDataRuntime.Configure() is a no-op there. -->
+  <ItemGroup Condition="'$(TzDataRuntimeCopyData)' != 'false'">
+    <None Include="$(_TzDataRuntimeDataDir)**/*"
+          Link="tzdata/%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
+
+</Project>

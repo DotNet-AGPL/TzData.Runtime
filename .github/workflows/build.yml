@@ -1,0 +1,162 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish the packed NuGet packages to nuget.org (manual)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Pack
+        run: |
+          dotnet pack src/TzData.Runtime/TzData.Runtime.csproj -c Release -o nupkg
+          dotnet pack src/TzData.Runtime.AutoInit/TzData.Runtime.AutoInit.csproj -c Release -o nupkg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg/*.nupkg
+
+  verify-data:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify committed tzdata (Debian 13 / zic)
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work debian:13 bash -c "
+            apt-get update -qq &&
+            apt-get install -y -qq curl ca-certificates tzdata diffutils >/dev/null &&
+            bash scripts/build-tzdata.sh 2026f --verify
+          "
+
+  test-linux:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-bookworm-slim
+            has-shell: true
+          - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine
+            has-shell: true
+          - image: mcr.microsoft.com/dotnet/runtime-deps:10.0-noble-chiseled
+            has-shell: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg
+
+      - name: Publish test apps (self-contained linux-x64)
+        run: |
+          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r linux-x64 --self-contained -p:UseAppLocalIcu=true -o out/tzd
+          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r linux-x64 --self-contained -p:UseAppLocalIcu=true -o out/auto
+
+      - name: Run in ${{ matrix.image }}
+        env:
+          IMAGE: ${{ matrix.image }}
+          HAS_SHELL: ${{ matrix.has-shell }}
+        run: |
+          if [ "$HAS_SHELL" = "true" ]; then
+            docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+              -v "$PWD/out:/app" -w /app "$IMAGE" sh -c '
+                chmod +x /app/tzd/TzData.Tests /app/auto/TzData.AutoInit.Tests
+                /app/tzd/TzData.Tests
+                /app/auto/TzData.AutoInit.Tests'
+          else
+            docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+              -v "$PWD/out:/app" -w /app "$IMAGE" /app/tzd/TzData.Tests
+            docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+              -v "$PWD/out:/app" -w /app "$IMAGE" /app/auto/TzData.AutoInit.Tests
+          fi
+
+  test-windows:
+    needs: build
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg
+
+      - name: Publish and run (Windows no-op)
+        run: |
+          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r win-x64 --self-contained -o out/tzd
+          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r win-x64 --self-contained -o out/auto
+          ./out/tzd/TzData.Tests.exe
+          ./out/auto/TzData.AutoInit.Tests.exe
+
+  test-macos:
+    needs: build
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg
+
+      - name: Publish and run (osx-arm64)
+        run: |
+          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r osx-arm64 --self-contained -p:UseAppLocalIcu=true -o out/tzd
+          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r osx-arm64 --self-contained -p:UseAppLocalIcu=true -o out/auto
+          ./out/tzd/TzData.Tests
+          ./out/auto/TzData.AutoInit.Tests
+
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+    needs: [build, verify-data, test-linux, test-windows, test-macos]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg
+
+      - name: Publish to NuGet (manual)
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "${NUGET_API_KEY:-}" ]; then
+            echo "NUGET_API_KEY is not set; cannot publish."
+            exit 1
+          fi
+          dotnet nuget push nupkg/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

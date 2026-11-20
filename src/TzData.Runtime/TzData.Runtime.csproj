@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <PackageId>TzData.Runtime</PackageId>
+    <Version>$(TzDataPackageVersion)</Version>
+    <Authors>DotNet-AGPL</Authors>
+    <Description>App-local IANA time zone data (tzdata $(TzDataVersion)) for .NET on Linux and macOS. Ships compiled TZif files and sets TZDIR via an explicit TzDataRuntime.Configure() call, so TimeZoneInfo works on Alpine, Chiseled and Distroless images without system tzdata. Windows is a no-op (NLS/registry).</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/DotNet-AGPL/TzData.Runtime</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DotNet-AGPL/TzData.Runtime</RepositoryUrl>
+    <PackageTags>timezone;tzdata;iana;tzif;globalization;app-local;chiseled;distroless</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <IncludeSymbols>false</IncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="TzDataVersion" Value="$(TzDataVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../tzdata/**" Pack="true" PackagePath="tzdata/" />
+    <None Include="../../buildTransitive/**" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE-TZDATA" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>

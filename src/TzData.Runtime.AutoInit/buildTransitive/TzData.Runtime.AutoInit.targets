@@ -1,0 +1,14 @@
+<Project>
+
+  <PropertyGroup>
+    <TzDataRuntimeAutoInit Condition="'$(TzDataRuntimeAutoInit)' == ''">true</TzDataRuntimeAutoInit>
+    <_TzDataAutoInitSource>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..', 'content', 'TzDataAutoInit.cs'))</_TzDataAutoInitSource>
+  </PropertyGroup>
+
+  <!-- Only executable projects get the initializer. Injecting into libraries would run at an
+       unpredictable time (when the library is loaded) and could be too late for TimeZoneInfo. -->
+  <ItemGroup Condition="'$(TzDataRuntimeAutoInit)' != 'false' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">
+    <Compile Include="$(_TzDataAutoInitSource)" Link="TzDataAutoInit.g.cs" />
+  </ItemGroup>
+
+</Project>

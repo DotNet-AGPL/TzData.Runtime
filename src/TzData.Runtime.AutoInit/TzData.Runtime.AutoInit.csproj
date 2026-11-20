@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <PackageId>TzData.Runtime.AutoInit</PackageId>
+    <Version>$(TzDataPackageVersion)</Version>
+    <Authors>DotNet-AGPL</Authors>
+    <Description>Opt-in automatic TZDIR setup for TzData.Runtime. Injects a module initializer into executable projects (Exe/WinExe) so TzDataRuntime.Configure() runs before Main. Does nothing on Windows. Disable with TzDataRuntimeAutoInit=false.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README-AUTOINIT.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/DotNet-AGPL/TzData.Runtime</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DotNet-AGPL/TzData.Runtime</RepositoryUrl>
+    <PackageTags>timezone;tzdata;app-local;module-initializer;autoinit</PackageTags>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Makes the data, targets and Configure() API flow to the consumer. -->
+    <PackageReference Include="TzData.Runtime" Version="$(TzDataPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive/**" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="content/**" Pack="true" PackagePath="content/" />
+    <None Include="../../README-AUTOINIT.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE-TZDATA" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/TzData.Runtime/TzData.Runtime.csproj" />
+  <Project Path="src/TzData.Runtime.AutoInit/TzData.Runtime.AutoInit.csproj" />
+  <Project Path="tests/TzData.Tests/TzData.Tests.csproj" />
+  <Project Path="tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj" />
+</Solution>
