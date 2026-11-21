@@ -6,10 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <PackageId>TzData.Runtime</PackageId>
+    <PackageId>TzData.Runtime.Linux</PackageId>
+    <AssemblyName>TzData.Runtime.Linux</AssemblyName>
+    <RootNamespace>TzData.Runtime.Linux</RootNamespace>
     <Version>$(TzDataPackageVersion)</Version>
     <Authors>DotNet-AGPL</Authors>
-    <Description>App-local IANA time zone data (tzdata $(TzDataVersion)) for .NET on Linux and macOS. Ships compiled TZif files and sets TZDIR via an explicit TzDataRuntime.Configure() call, so TimeZoneInfo works on Alpine, Chiseled and Distroless images without system tzdata. Windows is a no-op (NLS/registry).</Description>
+    <Description>Linux-only app-local IANA time zone data (tzdata $(TzDataVersion)) for .NET. Ships compiled TZif files and sets TZDIR via an explicit TzDataRuntime.Configure() call, so TimeZoneInfo works on Alpine, Chiseled and Distroless images without system tzdata. macOS is not supported; Windows is a no-op (NLS/registry).</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/DotNet-AGPL/TzData.Runtime</PackageProjectUrl>

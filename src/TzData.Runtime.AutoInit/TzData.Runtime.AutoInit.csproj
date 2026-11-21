@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <PackageId>TzData.Runtime.AutoInit</PackageId>
+    <PackageId>TzData.Runtime.Linux.AutoInit</PackageId>
     <Version>$(TzDataPackageVersion)</Version>
     <Authors>DotNet-AGPL</Authors>
-    <Description>Opt-in automatic TZDIR setup for TzData.Runtime. Injects a module initializer into executable projects (Exe/WinExe) so TzDataRuntime.Configure() runs before Main. Does nothing on Windows. Disable with TzDataRuntimeAutoInit=false.</Description>
+    <Description>Opt-in automatic TZDIR setup for TzData.Runtime.Linux. Injects a module initializer into executable projects (Exe/WinExe) so TzDataRuntime.Configure() runs before Main, and applies the optional build-time default time zone (TzDataRuntimeAutoInitTimeZone). Linux-only; disable with TzDataRuntimeAutoInit=false.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README-AUTOINIT.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/DotNet-AGPL/TzData.Runtime</PackageProjectUrl>
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <!-- Makes the data, targets and Configure() API flow to the consumer. -->
-    <PackageReference Include="TzData.Runtime" Version="$(TzDataPackageVersion)" />
+    <PackageReference Include="TzData.Runtime.Linux" Version="$(TzDataPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

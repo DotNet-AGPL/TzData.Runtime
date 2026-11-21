@@ -5,10 +5,10 @@
     <_TzDataRuntimeDataDir>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)..', 'tzdata'))</_TzDataRuntimeDataDir>
   </PropertyGroup>
 
-  <!-- Copy the packaged tzdata next to the app (and into the publish root). The data is copied on
-       every OS so cross-publishing (for example Windows -> linux-x64) also works; Windows apps
-       simply never use it because TzDataRuntime.Configure() is a no-op there. -->
-  <ItemGroup Condition="'$(TzDataRuntimeCopyData)' != 'false'">
+  <!-- Linux-only: copy the packaged tzdata next to the app (and into the publish root).
+       This covers explicit Linux RIDs (including cross-publishing from Windows/macOS) and
+       portable builds made on a Linux host. Non-Linux builds do not get the data. -->
+  <ItemGroup Condition="'$(TzDataRuntimeCopyData)' != 'false' and ($([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux-')) or ('$(RuntimeIdentifier)' == '' and $([MSBuild]::IsOSPlatform('Linux'))))">
     <None Include="$(_TzDataRuntimeDataDir)**/*"
           Link="tzdata/%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest"

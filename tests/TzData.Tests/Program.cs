@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using TzData;
+using TzData.Runtime.Linux;
 
 internal static class Program
 {

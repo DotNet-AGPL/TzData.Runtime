@@ -3,16 +3,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace TzData;
+namespace TzData.Runtime.Linux;
 
 /// <summary>
-/// Configures app-local IANA time zone data for <see cref="TimeZoneInfo"/> on Linux and macOS.
+/// Configures app-local IANA time zone data for <see cref="TimeZoneInfo"/> on Linux.
 /// </summary>
 /// <remarks>
 /// .NET reads TZif files from <c>TZDIR</c> (default <c>/usr/share/zoneinfo</c>) on Unix.
 /// Calling <see cref="Configure"/> points <c>TZDIR</c> at the <c>tzdata</c> folder copied next to
-/// the application by the <c>TzData.Runtime</c> package. Windows uses the NLS/registry database,
-/// so all methods are no-ops there (see <see cref="IsSupported"/>).
+/// the application by the <c>TzData.Runtime.Linux</c> package. This package is Linux-only:
+/// macOS already ships tzdata, and Windows uses NLS/registry, so both are no-ops
+/// (see <see cref="IsSupported"/>).
 /// </remarks>
 public static class TzDataRuntime
 {
@@ -33,9 +34,9 @@ public static class TzDataRuntime
             ?.Value ?? "unknown";
 
     /// <summary>
-    /// <see langword="true"/> on Linux and macOS; <see langword="false"/> on Windows.
+    /// <see langword="true"/> on Linux; <see langword="false"/> elsewhere.
     /// </summary>
-    public static bool IsSupported => !OperatingSystem.IsWindows();
+    public static bool IsSupported => OperatingSystem.IsLinux();
 
     /// <summary>
     /// The default data folder: <c>tzdata</c> next to the application executable.
@@ -61,7 +62,7 @@ public static class TzDataRuntime
     /// When <see langword="true"/>, replaces an existing <c>TZDIR</c>/<c>TZ</c>. The default
     /// respects values already provided by the environment.
     /// </param>
-    /// <returns><see langword="true"/> when configured; <see langword="false"/> on Windows.</returns>
+    /// <returns><see langword="true"/> when configured; <see langword="false"/> on non-Linux platforms.</returns>
     /// <exception cref="DirectoryNotFoundException">The directory does not contain tzdata.</exception>
     /// <exception cref="TimeZoneNotFoundException"><paramref name="defaultTimeZoneId"/> is not present in the data.</exception>
     public static bool Configure(string? directory = null, string? defaultTimeZoneId = null, bool overwrite = false)
@@ -117,7 +118,7 @@ public static class TzDataRuntime
         if (!Directory.Exists(directory))
         {
             throw new DirectoryNotFoundException(
-                $"The tzdata directory '{directory}' was not found. Publish the app with the TzData.Runtime package, or pass a valid directory to Configure().");
+                $"The tzdata directory '{directory}' was not found. Publish the app with the TzData.Runtime.Linux package, or pass a valid directory to Configure().");
         }
 
         string zoneTab = Path.Combine(directory, "zone.tab");

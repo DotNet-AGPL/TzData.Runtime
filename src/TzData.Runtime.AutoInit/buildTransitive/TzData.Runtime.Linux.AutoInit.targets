@@ -1,0 +1,24 @@
+<Project>
+
+  <PropertyGroup>
+    <TzDataRuntimeAutoInit Condition="'$(TzDataRuntimeAutoInit)' == ''">true</TzDataRuntimeAutoInit>
+    <_TzDataAutoInitEnabled Condition="'$(TzDataRuntimeAutoInit)' != 'false' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</_TzDataAutoInitEnabled>
+    <_TzDataAutoInitSource>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..', 'content', 'TzDataAutoInit.cs'))</_TzDataAutoInitSource>
+  </PropertyGroup>
+
+  <!-- Only executable projects get the initializer. Injecting into libraries would run at an
+       unpredictable time (when the library is loaded) and could be too late for TimeZoneInfo. -->
+  <ItemGroup Condition="'$(_TzDataAutoInitEnabled)' == 'true'">
+    <Compile Include="$(_TzDataAutoInitSource)" Link="TzDataAutoInit.g.cs" />
+  </ItemGroup>
+
+  <!-- Optional build-time default local time zone. It is stored as assembly metadata and
+       applied by the initializer with higher priority than the TZ environment variable. -->
+  <ItemGroup Condition="'$(_TzDataAutoInitEnabled)' == 'true' and '$(TzDataRuntimeAutoInitTimeZone)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>TzDataRuntime.DefaultTimeZone</_Parameter1>
+      <_Parameter2>$(TzDataRuntimeAutoInitTimeZone)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

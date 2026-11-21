@@ -3,9 +3,8 @@
   <PropertyGroup>
     <!-- Single source of truth for the NuGet package version.
          Package version is independent from the bundled IANA tzdata release:
-             1.0.0 : tzdata 2026f
-             1.0.1 : next packaging/data update, same scheme. -->
-    <TzDataPackageVersion Condition="'$(TzDataPackageVersion)' == ''">1.0.0</TzDataPackageVersion>
+             1.0.1 : Linux-only package IDs (TzData.Runtime.Linux), tzdata 2026f -->
+    <TzDataPackageVersion Condition="'$(TzDataPackageVersion)' == ''">1.0.1</TzDataPackageVersion>
 
     <!-- IANA tzdata release compiled into tzdata/ (see scripts/build-tzdata.sh). -->
     <TzDataVersion Condition="'$(TzDataVersion)' == ''">2026f</TzDataVersion>

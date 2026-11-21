@@ -92,11 +92,15 @@ jobs:
               -v "$PWD/out:/app" -w /app "$IMAGE" sh -c '
                 chmod +x /app/tzd/TzData.Tests /app/auto/TzData.AutoInit.Tests
                 /app/tzd/TzData.Tests
-                /app/auto/TzData.AutoInit.Tests'
+                TZ=Europe/Kyiv /app/auto/TzData.AutoInit.Tests
+                TZ=Europe/Kyiv TZDATA_DISABLE_DEFAULT_TZ=1 /app/auto/TzData.AutoInit.Tests'
           else
             docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
               -v "$PWD/out:/app" -w /app "$IMAGE" /app/tzd/TzData.Tests
-            docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+            docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false -e TZ=Europe/Kyiv \
+              -v "$PWD/out:/app" -w /app "$IMAGE" /app/auto/TzData.AutoInit.Tests
+            docker run --rm -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false -e TZ=Europe/Kyiv \
+              -e TZDATA_DISABLE_DEFAULT_TZ=1 \
               -v "$PWD/out:/app" -w /app "$IMAGE" /app/auto/TzData.AutoInit.Tests
           fi
 
@@ -122,32 +126,9 @@ jobs:
           ./out/tzd/TzData.Tests.exe
           ./out/auto/TzData.AutoInit.Tests.exe
 
-  test-macos:
-    needs: build
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: nupkg
-          path: nupkg
-
-      - name: Publish and run (osx-arm64)
-        run: |
-          # macOS has a system ICU; this test isolates tzdata from the app-local ICU package.
-          dotnet publish tests/TzData.Tests/TzData.Tests.csproj -c Release -r osx-arm64 --self-contained -o out/tzd
-          dotnet publish tests/TzData.AutoInit.Tests/TzData.AutoInit.Tests.csproj -c Release -r osx-arm64 --self-contained -o out/auto
-          ./out/tzd/TzData.Tests
-          ./out/auto/TzData.AutoInit.Tests
-
   publish:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
-    needs: [build, verify-data, test-linux, test-windows, test-macos]
+    needs: [build, verify-data, test-linux, test-windows]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
