@@ -77,6 +77,20 @@ It can also bake in a default local time zone (applied with **higher priority th
 
 See [README-AUTOINIT.md](README-AUTOINIT.md) for the exact guarantees, precedence and opt-outs.
 
+## Agent skill (SKILL.md)
+
+Both packages ship an [Agent Skill](https://agentskills.io/specification) at
+`skills/tzdata-runtime-linux/SKILL.md`. Agents can discover it from the restored package:
+
+```bash
+dotnet-inspect package TzData.Runtime.Linux -S Skills
+dotnet-package-skills install
+ls ~/.nuget/packages/tzdata.runtime.linux/*/skills/
+```
+
+The skill is frozen inside each `.nupkg` and covers TZDIR/TZ precedence, the AutoInit default zone,
+verification snippets and troubleshooting.
+
 ## Containers
 
 ```dockerfile

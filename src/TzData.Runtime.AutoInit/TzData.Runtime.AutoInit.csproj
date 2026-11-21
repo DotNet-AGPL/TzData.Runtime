@@ -28,6 +28,7 @@
   <ItemGroup>
     <None Include="buildTransitive/**" Pack="true" PackagePath="buildTransitive/" />
     <None Include="content/**" Pack="true" PackagePath="content/" />
+    <None Include="../../skills/**" Pack="true" PackagePath="skills/" />
     <None Include="../../README-AUTOINIT.md" Pack="true" PackagePath="/" />
     <None Include="../../LICENSE" Pack="true" PackagePath="/" />
     <None Include="../../LICENSE-TZDATA" Pack="true" PackagePath="/" />

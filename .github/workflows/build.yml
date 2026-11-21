@@ -31,6 +31,14 @@ jobs:
           dotnet pack src/TzData.Runtime/TzData.Runtime.csproj -c Release -o nupkg
           dotnet pack src/TzData.Runtime.AutoInit/TzData.Runtime.AutoInit.csproj -c Release -o nupkg
 
+      - name: Verify bundled agent skill
+        run: |
+          for f in nupkg/*.nupkg; do
+            unzip -l "$f" | grep -q 'skills/tzdata-runtime-linux/SKILL.md' \
+              || { echo "Missing skills/tzdata-runtime-linux/SKILL.md in $f"; exit 1; }
+          done
+          echo "All packages contain the agent skill."
+
       - uses: actions/upload-artifact@v4
         with:
           name: nupkg
